@@ -1,9 +1,11 @@
 # Conf
 
 [![CircleCI](https://circleci.com/gh/ardanlabs/conf.svg?style=svg)](https://circleci.com/gh/ardanlabs/conf)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ardanlabs/conf)](https://goreportcard.com/report/github.com/ardanlabs/conf)
+[![go.mod Go version](https://img.shields.io/github/go-mod/go-version/ardanlabs/conf)](https://github.com/ardanlabs/conf)
 
 Copyright 2018, 2019, 2020, 2021, Ardan Labs  
-info@ardanlabs.com
+hello@ardanlabs.com
 
 ## Licensing
 
@@ -26,4 +28,4 @@ limitations under the License.
 Package conf provides support for using environmental variables and command
 line arguments for configuration.
 
-All of the documentation can be found on the [go.dev](https://pkg.go.dev/github.com/ardanlabs/conf?tab=doc) website.
+All of the documentation can be found on the [go.dev](https://pkg.go.dev/github.com/ardanlabs/conf/v3?tab=doc) website.

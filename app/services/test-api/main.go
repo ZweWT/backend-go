@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"expvar"
 	"fmt"
@@ -12,7 +13,7 @@ import (
 	"time"
 
 	"github.com/ZweWT/backend-go/app/services/test-api/handlers"
-	"github.com/ardanlabs/conf"
+	"github.com/ardanlabs/conf/v3"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -85,7 +86,7 @@ func run(log *zap.SugaredLogger) error {
 	// App Starting
 
 	log.Infow("starting service", "version", build)
-	defer log.Infow("shutdown complete")
+	// defer log.Infow("shutdown complete")
 
 	out, err := conf.String(&cfg)
 	if err != nil {
@@ -103,7 +104,7 @@ func run(log *zap.SugaredLogger) error {
 	// related endpoints. This includes the standard library endpoints.
 
 	// Construct the mux for debug calls.
-	debugMux := handlers.DebugMux(build, log)
+	debugMux := handlers.DebugMux()
 
 	//start the service listening for debug requests.
 
@@ -147,6 +148,23 @@ func run(log *zap.SugaredLogger) error {
 
 	// =========================================================================
 	// Shutdown
+
+	select {
+	case err := <-serverErrors:
+		return fmt.Errorf("server error: %w", err)
+
+	case sig := <-shutdown:
+		log.Infow("shutdown", "status", "shutdown started", "signal", sig)
+		defer log.Infow("shutdown", "status", "shutdown complete", "signal", sig)
+
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
+		defer cancel()
+
+		if err := api.Shutdown(ctx); err != nil {
+			api.Close()
+			return fmt.Errorf("could not stop server gracefully: %w", err)
+		}
+	}
 
 	return nil
 
