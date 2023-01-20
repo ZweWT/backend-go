@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/ZweWT/backend-go/app/services/sales-api/handlers/v1/testgrp"
+	"github.com/ZweWT/backend-go/bussiness/web/mid"
 	"github.com/ZweWT/backend-go/foundation/web"
 	"go.uber.org/zap"
 )
@@ -29,14 +30,27 @@ type APIMuxConfig struct {
 	Log      *zap.SugaredLogger
 }
 
+// APIMux constructs an http.Handler with all application routes defined.
 func APIMux(cfg APIMuxConfig) *web.App {
-	app := web.NewApp(cfg.Shutdown)
+
+	// Construct the web.App which holds all routes.
+	app := web.NewApp(
+		cfg.Shutdown,
+		mid.Logger(cfg.Log),
+	)
+
+	// Load the routes for the different versions of the API.
+	v1(app, cfg)
+
+	return app
+}
+
+// v1 binds all the version 1 routes.
+func v1(app *web.App, cfg APIMuxConfig) {
+	const version = "v1"
 
 	tgh := testgrp.Handlers{
 		Log: cfg.Log,
 	}
-
-	app.Handle(http.MethodGet, "/v1/", "test", tgh.Test)
-
-	return app
+	app.Handle(http.MethodGet, version, "/test", tgh.Test)
 }

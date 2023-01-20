@@ -4,8 +4,11 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"syscall"
+	"time"
 
 	"github.com/dimfeld/httptreemux/v5"
+	"github.com/google/uuid"
 )
 
 // A Handler is a type that handles an http request within our own little mini
@@ -29,23 +32,42 @@ func NewApp(shutdown chan os.Signal, mw ...Middleware) *App {
 	}
 }
 
+// SignalShutdown is used to gracefully shutdown the app when an integrity
+// issue is identified.
+func (a *App) SignalShutdown() {
+	a.shutdown <- syscall.SIGTERM
+}
+
 // Handle sets a handler function for a given HTTP method and path pair
 // to the application server mux.
 func (a *App) Handle(method string, group string, path string, handler Handler, mw ...Middleware) {
 
+	// First wrap handler specific middleware around this handler.
 	handler = wrapMiddleware(mw, handler)
 
+	// Add the application's general middleware to the handler chain.
 	handler = wrapMiddleware(a.mw, handler)
 
+	// The function to execute for each request.
 	h := func(w http.ResponseWriter, r *http.Request) {
 
-		if err := handler(r.Context(), w, r); err != nil {
+		// Pull the context from the request and
+		// use it as a separate parameter.
+		ctx := r.Context()
 
-			// ERROR HANDLING
+		// Set the context with the required values to
+		// process the request.
+		v := Values{
+			TraceID: uuid.New().String(),
+			Now:     time.Now(),
+		}
+		ctx = context.WithValue(ctx, key, &v)
+
+		// Call the wrapped handler functions.
+		if err := handler(ctx, w, r); err != nil {
+			a.SignalShutdown()
 			return
 		}
-
-		// POST CODE PROCESSING
 	}
 
 	finalPath := path
