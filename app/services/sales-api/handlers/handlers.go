@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/ZweWT/backend-go/app/services/sales-api/handlers/v1/testgrp"
-	"github.com/dimfeld/httptreemux/v5"
+	"github.com/ZweWT/backend-go/foundation/web"
 	"go.uber.org/zap"
 )
 
@@ -29,14 +29,14 @@ type APIMuxConfig struct {
 	Log      *zap.SugaredLogger
 }
 
-func APIMux(cfg APIMuxConfig) *httptreemux.ContextMux {
-	mux := httptreemux.NewContextMux()
+func APIMux(cfg APIMuxConfig) *web.App {
+	app := web.NewApp(cfg.Shutdown)
 
 	tgh := testgrp.Handlers{
 		Log: cfg.Log,
 	}
 
-	mux.Handle(http.MethodGet, "/test", tgh.Test)
+	app.Handle(http.MethodGet, "/v1/", "test", tgh.Test)
 
-	return mux
+	return app
 }
