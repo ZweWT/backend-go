@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ZweWT/backend-go/app/services/test-api/handlers"
+	"github.com/ZweWT/backend-go/app/services/sales-api/handlers"
 	"github.com/ardanlabs/conf/v3"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
@@ -72,7 +72,7 @@ func run(log *zap.SugaredLogger) error {
 	}
 
 	//prefixing before config variables
-	const prefix = "TEST"
+	const prefix = "SALES"
 	help, err := conf.Parse(prefix, &cfg)
 	if err != nil {
 		if errors.Is(err, conf.ErrHelpWanted) {
@@ -124,12 +124,15 @@ func run(log *zap.SugaredLogger) error {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	//apiMux here
+	apiMux := handlers.APIMux(handlers.APIMuxConfig{
+		Shutdown: shutdown,
+		Log:      log,
+	})
 
 	// Construct a server to serve requests against the mux
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      nil,
+		Handler:      apiMux,
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 		IdleTimeout:  cfg.Web.IdleTimeout,
