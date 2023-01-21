@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/ZweWT/backend-go/app/services/sales-api/handlers/v1/testgrp"
+	"github.com/ZweWT/backend-go/bussiness/sys/auth"
 	"github.com/ZweWT/backend-go/bussiness/web/mid"
 	"github.com/ZweWT/backend-go/foundation/web"
 	"go.uber.org/zap"
@@ -28,6 +29,7 @@ func DebugMux() http.Handler {
 type APIMuxConfig struct {
 	Shutdown chan os.Signal
 	Log      *zap.SugaredLogger
+	Auth     *auth.Auth
 }
 
 // APIMux constructs an http.Handler with all application routes defined.
@@ -54,4 +56,5 @@ func v1(app *web.App, cfg APIMuxConfig) {
 		Log: cfg.Log,
 	}
 	app.Handle(http.MethodGet, version, "/test", tgh.Test)
+	app.Handle(http.MethodGet, version, "/testauth", tgh.Test, mid.Authenticate(cfg.Auth), mid.Authorize("ADMIN"))
 }
