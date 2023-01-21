@@ -6,14 +6,16 @@ import (
 	"net/http/pprof"
 	"os"
 
+	"github.com/ZweWT/backend-go/app/services/sales-api/handlers/debug/checkgrp"
 	"github.com/ZweWT/backend-go/app/services/sales-api/handlers/v1/testgrp"
 	"github.com/ZweWT/backend-go/bussiness/sys/auth"
 	"github.com/ZweWT/backend-go/bussiness/web/mid"
 	"github.com/ZweWT/backend-go/foundation/web"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
 
-func DebugMux() http.Handler {
+func DebugStandardLibraryMux() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/debug/pprof", pprof.Index)
@@ -26,10 +28,28 @@ func DebugMux() http.Handler {
 	return mux
 }
 
+// DebugMux registers all the debug standard library routes and then custom
+// debug application routes for the service.
+func DebugMux(build string, log *zap.SugaredLogger, db *sqlx.DB) http.Handler {
+	mux := DebugStandardLibraryMux()
+
+	// Register debug check endpoints.
+	cgh := checkgrp.Handlers{
+		Build: build,
+		Log:   log,
+		DB:    db,
+	}
+
+	mux.HandleFunc("/debug/readiness", cgh.Readiness)
+
+	return mux
+}
+
 type APIMuxConfig struct {
 	Shutdown chan os.Signal
 	Log      *zap.SugaredLogger
 	Auth     *auth.Auth
+	DB       *sqlx.DB
 }
 
 // APIMux constructs an http.Handler with all application routes defined.
@@ -40,6 +60,8 @@ func APIMux(cfg APIMuxConfig) *web.App {
 		cfg.Shutdown,
 		mid.Logger(cfg.Log),
 		mid.Errors(cfg.Log),
+		mid.Metrics(),
+		mid.Panics(),
 	)
 
 	// Load the routes for the different versions of the API.
