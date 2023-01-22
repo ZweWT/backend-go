@@ -46,7 +46,7 @@ func (c Core) Update(ctx context.Context, claims auth.Claims, productID string, 
 	// PERFORM PRE BUSINESS OPERATIONS
 
 	if err := c.product.Update(ctx, claims, productID, up, now); err != nil {
-		return fmt.Errorf("udpate: %w", err)
+		return fmt.Errorf("update: %w", err)
 	}
 
 	// PERFORM POST BUSINESS OPERATIONS

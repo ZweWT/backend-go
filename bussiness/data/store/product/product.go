@@ -74,7 +74,7 @@ func (s Store) Update(ctx context.Context, claims auth.Claims, productID string,
 
 	product, err := s.QueryByID(ctx, claims, productID)
 	if err != nil {
-		return fmt.Errorf("updating user userID[%s]: %w", productID, err)
+		return fmt.Errorf("updating product productID[%s]: %w", productID, err)
 	}
 
 	if up.Name != nil {
@@ -90,15 +90,14 @@ func (s Store) Update(ctx context.Context, claims auth.Claims, productID string,
 
 	const q = `
 	UPDATE
-		users
+		products
 	SET 
 		"name" = :name,
-		"email" = :email,
-		"roles" = :roles,
-		"password_hash" = :password_hash,
+		"category_id" = :category_id,
+		"cost" = :cost,
 		"date_updated" = :date_updated
 	WHERE
-		user_id = :user_id`
+		product_id = :product_id`
 
 	if err := database.NamedExecContext(ctx, s.log, s.db, q, product); err != nil {
 		return fmt.Errorf("updating userID[%s]: %w", productID, err)
@@ -118,9 +117,9 @@ func (s Store) Delete(ctx context.Context, claims auth.Claims, productID string)
 	}
 
 	data := struct {
-		productID string `db:"product_id"`
+		ProductID string `db:"product_id"`
 	}{
-		productID: productID,
+		ProductID: productID,
 	}
 
 	const q = `
@@ -143,9 +142,9 @@ func (s Store) QueryByID(ctx context.Context, claims auth.Claims, productID stri
 	}
 
 	data := struct {
-		productID string `db:"product_id"`
+		ProductID string `db:"product_id"`
 	}{
-		productID: productID,
+		ProductID: productID,
 	}
 
 	const q = `
