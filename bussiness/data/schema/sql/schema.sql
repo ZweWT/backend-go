@@ -18,7 +18,7 @@ CREATE TABLE categories (
 	category_id   SERIAL,
 	name         TEXT,
 
-	PRIMARY KEY (category_id),
+	PRIMARY KEY (category_id)
 );
 
 -- Version: 1.3

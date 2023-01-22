@@ -4,7 +4,7 @@ INSERT INTO users (user_id, name, email, roles, password_hash, date_created, dat
 	ON CONFLICT DO NOTHING;
 
 INSERT INTO categories(name) VALUES
-	('Shoe')
+	('Shoe'),
 	('Shirt')
 	ON CONFLICT DO NOTHING;
 
