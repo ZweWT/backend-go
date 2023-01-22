@@ -58,7 +58,7 @@ func (s Store) Create(ctx context.Context, claims auth.Claims, np NewProduct, no
 	return product, nil
 }
 
-// Update replaces a user document in the database.
+// Update replaces a product document in the database.
 func (s Store) Update(ctx context.Context, claims auth.Claims, productID string, up UpdateProduct, now time.Time) error {
 	if err := validate.CheckID(productID); err != nil {
 		return database.ErrInvalidID
@@ -107,7 +107,7 @@ func (s Store) Update(ctx context.Context, claims auth.Claims, productID string,
 	return nil
 }
 
-// Delete removes a user from the database.
+// Delete removes a product from the database.
 func (s Store) Delete(ctx context.Context, claims auth.Claims, productID string) error {
 	if err := validate.CheckID(productID); err != nil {
 		return database.ErrInvalidID
@@ -136,7 +136,7 @@ func (s Store) Delete(ctx context.Context, claims auth.Claims, productID string)
 	return nil
 }
 
-// QueryByID gets the specified user from the database.
+// QueryByID gets the specified product from the database.
 func (s Store) QueryByID(ctx context.Context, claims auth.Claims, productID string) (Product, error) {
 	if err := validate.CheckID(productID); err != nil {
 		return Product{}, database.ErrInvalidID
@@ -167,7 +167,7 @@ func (s Store) QueryByID(ctx context.Context, claims auth.Claims, productID stri
 	return product, nil
 }
 
-// Query retrieves a list of existing users from the database.
+// Query retrieves a list of existing products from the database.
 func (s Store) Query(ctx context.Context, pageNumber int, rowsPerPage int) ([]Product, error) {
 	data := struct {
 		Offset      int `db:"offset"`

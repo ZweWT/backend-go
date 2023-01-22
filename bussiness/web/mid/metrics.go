@@ -35,6 +35,7 @@ func Metrics() web.Middleware {
 			}
 
 			// Return the error so it can be handled further up the chain.
+
 			return err
 		}
 

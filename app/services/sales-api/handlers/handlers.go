@@ -7,7 +7,11 @@ import (
 	"os"
 
 	"github.com/ZweWT/backend-go/app/services/sales-api/handlers/debug/checkgrp"
-	"github.com/ZweWT/backend-go/app/services/sales-api/handlers/v1/testgrp"
+	v1ProductGrp "github.com/ZweWT/backend-go/app/services/sales-api/handlers/v1/productgrp"
+	v1TestGrp "github.com/ZweWT/backend-go/app/services/sales-api/handlers/v1/testgrp"
+	v1UserGrp "github.com/ZweWT/backend-go/app/services/sales-api/handlers/v1/usergrp"
+	productCore "github.com/ZweWT/backend-go/bussiness/core/product"
+	userCore "github.com/ZweWT/backend-go/bussiness/core/user"
 	"github.com/ZweWT/backend-go/bussiness/sys/auth"
 	"github.com/ZweWT/backend-go/bussiness/web/mid"
 	"github.com/ZweWT/backend-go/foundation/web"
@@ -74,9 +78,32 @@ func APIMux(cfg APIMuxConfig) *web.App {
 func v1(app *web.App, cfg APIMuxConfig) {
 	const version = "v1"
 
-	tgh := testgrp.Handlers{
+	tgh := v1TestGrp.Handlers{
 		Log: cfg.Log,
 	}
 	app.Handle(http.MethodGet, version, "/test", tgh.Test)
 	app.Handle(http.MethodGet, version, "/testauth", tgh.Test, mid.Authenticate(cfg.Auth), mid.Authorize("ADMIN"))
+
+	// Register user and authenticaton endpoints
+	ugh := v1UserGrp.Handlers{
+		User: userCore.NewCore(cfg.Log, cfg.DB),
+		Auth: cfg.Auth,
+	}
+	app.Handle(http.MethodGet, version, "/users/token", ugh.Token)
+	app.Handle(http.MethodGet, version, "/users/:page/:rows", ugh.Query, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+	app.Handle(http.MethodGet, version, "/users/:id", ugh.QueryByID, mid.Authenticate(cfg.Auth))
+	// app.Handle(http.MethodPost, version, "/users", ugh.Create, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+	// app.Handle(http.MethodPut, version, "/users/:id", ugh.Update, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+	// app.Handle(http.MethodDelete, version, "/users/:id", ugh.Delete, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+
+	// Register product endpoints
+	pgh := v1ProductGrp.Handlers{
+		Product: productCore.NewCore(cfg.Log, cfg.DB),
+		Auth:    cfg.Auth,
+	}
+
+	app.Handle(http.MethodGet, version, "/products/:page/:rows", pgh.Query, mid.Authenticate(cfg.Auth))
+	app.Handle(http.MethodPost, version, "/products", pgh.Create, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+	app.Handle(http.MethodPut, version, "/products/:id", pgh.Update, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+	app.Handle(http.MethodDelete, version, "/products/:id", pgh.Delete, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
 }
