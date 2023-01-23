@@ -10,6 +10,8 @@ tidy:
 	go mod tidy
 	go mod vendor
 
-# Testing Auth
-# curl -il http://localhost:3000/v1/testauth
-# curl -il -H "Authorization: Bearer ${TOKEN}" http://localhost:3000/v1/testauth
+# For testing load on the service
+# hey -m GET -c 100 -n 10000 http://localhost:3000/v1/test
+
+# For monitoring the service 
+# expvarmon -ports=":4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.Alloc"
