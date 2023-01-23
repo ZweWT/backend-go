@@ -152,13 +152,17 @@ func (h Handlers) Token(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return web.NewShutdownError("web value missing from context")
 	}
 
-	email, pass, ok := r.BasicAuth()
-	if !ok {
-		err := errors.New("must provide email and password in Basic auth")
-		return validate.NewRequestError(err, http.StatusUnauthorized)
-	}
+	// email, pass, ok := r.BasicAuth()
+	// if !ok {
+	// 	err := errors.New("must provide email and password in Basic auth")
+	// 	return validate.NewRequestError(err, http.StatusUnauthorized)
+	// }
 
-	claims, err := h.User.Authenticate(ctx, v.Now, email, pass)
+	var lu user.LoginUser
+	if err := web.Decode(r, &lu); err != nil {
+		return fmt.Errorf("unable to decode payload: %w", err)
+	}
+	claims, err := h.User.Authenticate(ctx, v.Now, lu.Email, lu.Password)
 	if err != nil {
 		switch validate.Cause(err) {
 		case database.ErrNotFound:

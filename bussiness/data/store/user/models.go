@@ -17,6 +17,11 @@ type User struct {
 	DateUpdated  time.Time      `db:"date_updated" json:"date_updated"`
 }
 
+type LoginUser struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
 // NewUser contains information needed to create a new User.
 type NewUser struct {
 	Name            string   `json:"name" validate:"required"`
