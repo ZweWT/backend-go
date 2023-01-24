@@ -6,7 +6,7 @@ Simple Go API Service with logging and monitoring
 
 
 
-## Run Locally
+## Run Locally with default values
 
 Clone the project
 
@@ -31,6 +31,31 @@ Start the server
 ```bash
   make run
 ```
+## Run project with customized values
+
+If you want to set env variables such as dbhost, and port etc, you can fix the default config(app/services/sales-api/main.go) or you can also set it in the cmdline.
+
+**Example**
+```bash
+  go run app/services/sales-api/main.go --web-api-host=127.0.0.1:8000
+```
+
+Available flags are - 
+
+`--web-api-host`
+`--web-debug-host`
+`--web-read-timeout`
+`--web-write-timeout`
+`--web-idle-timeout`
+`--web-shutdown-timeout`
+`--auth-keys-folder`
+`--auth-active-kid`
+`--db-user`
+`--db-password`
+`--db-host`
+`--db-name`
+`--db-max-idle-conns`
+`--db-max-open-conns`
 
 
 ## Load Tests and Monitoring
